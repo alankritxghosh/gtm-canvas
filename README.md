@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Agentic GTM Canvas
 
-## Getting Started
+The **Agentic GTM Canvas** is the culmination of my B2B product trajectory—the evolutionary next step in orchestrating full-scale agentic infrastructure. It bridges the gap between raw idea generation and ruthless, deployable execution.
 
-First, run the development server:
+Building on the foundation laid by specialized workflow automations like **Signal** and audit tools like **ZeroSample**, this canvas represents a shift toward building cohesive ecosystems of AI products. It transforms a scattered set of tools into a unified, visual strategy engine designed for rapid shipping and impactful results.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## The Vision
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Gone are the days of disjointed chat interfaces for complex planning. The Agentic GTM Canvas provides a dynamic, nodal interface where strategic pillars expand autonomously into deployable artifacts (e.g., cold emails, boolean search queries, competitive battlecards). This isn’t just a whiteboard; it’s an interactive control center engineered to act as the Principal GTM Architect for ambitious SaaS founders.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🏗 System Architecture & Tech Stack
 
-## Learn More
+Engineered for production-grade reliability and lightning-fast UX, optimized specifically for Vercel's Edge network:
 
-To learn more about Next.js, take a look at the following resources:
+- **Core Framework:** Next.js (App Router, Edge Runtime)
+- **Canvas Engine:** React Flow
+- **State Management & Persistence:** Zustand (with `persist` middleware)
+- **UI & Animations:** Tailwind CSS (Strict Dark Mode), Framer Motion, Lucide React
+- **Validation:** Zod (Strict schema validation for defensive AI engineering)
+- **Telemetry & UX Polish:** PostHog, Sonner, React Markdown
+- **Artifact Export:** HTML2Canvas, jsPDF
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🔥 Key Defenses & Mechanisms
 
-## Deploy on Vercel
+1. **Defensive AI Engineering:** Every API payload from Gemini 3 Flash Preview is strictly validated via Zod schemas before rendering. Zero exceptions.
+2. **Edge Runtimes:** API endpoints run on the Edge for zero cold-start latency.
+3. **Graceful Degradation:** Malformed outputs trigger silent recalibrations and elegant error toasts via Sonner. No app crashes.
+4. **Non-blocking UI:** Ghost nodes with pulse animations maintain visual engagement without blocking user interaction during API calls.
+5. **Persistent State:** Zustand syncs the canvas to local storage, ensuring your strategic architectures survive page reloads.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🚀 Deployment (The Vercel Pipeline)
+
+Designed to be pushed to GitHub and instantly imported into Vercel.
+
+**Critical Deployment Step:** 
+Ensure your Environment Variables are rigidly configured in the Vercel dashboard:
+- `GEMINI_API_KEY`: Required for the agentic generative engine.
+- `NEXT_PUBLIC_POSTHOG_KEY`: Required for telemetry capture.
+- `NEXT_PUBLIC_POSTHOG_HOST`: Set according to your region (e.g., `https://us.i.posthog.com`).
+
+Failing to inject these will instantly fail node generations in production.
+
+---
+
+*Engineered by Alankrit.*
