@@ -66,7 +66,6 @@ export function AgentNode({ id, data, positionAbsoluteX, positionAbsoluteY }: an
             }
         } catch (e) {
             console.error(e);
-            posthog.captureException(e);
             posthog.capture('agent_expansion_failed', { pillar_name: data.label, reason: 'api_error' });
             toast.error(e instanceof Error ? e.message : "Agent overloaded. Recalibrating strategy...");
         } finally {

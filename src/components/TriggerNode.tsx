@@ -53,7 +53,6 @@ export function TriggerNode({ id, data }: { id: string, data: any }) {
             }
         } catch (e) {
             console.error(e);
-            posthog.captureException(e);
             posthog.capture('strategy_generation_failed', { reason: 'api_error', input_length: data.input.length });
             toast.error(e instanceof Error ? e.message : "Agent overloaded. Recalibrating strategy...");
         } finally {
