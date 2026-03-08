@@ -1,7 +1,7 @@
 import { X, Copy, Check, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -16,12 +16,21 @@ export function SidePanel() {
 
     const data = selectedNode.data;
 
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
     const handleCopy = () => {
         navigator.clipboard.writeText(data.content || '');
         setCopied(true);
         posthog.capture('artifact_copied', { title: data.label });
-        setTimeout(() => setCopied(false), 2000);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => setCopied(false), 2000);
     };
+
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        };
+    }, []);
 
     const contentRef = useRef<HTMLDivElement>(null);
     const [isExporting, setIsExporting] = useState(false);

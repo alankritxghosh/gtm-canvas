@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Plus, BrainCircuit, Loader2 } from 'lucide-react';
 import { useCanvasStore } from '@/store/useCanvasStore';
@@ -13,6 +13,13 @@ export function AgentNode({ id, data, positionAbsoluteX, positionAbsoluteY }: an
 
     const setIsGeneratingGlobal = useCanvasStore((state) => state.setIsGenerating);
     const isGeneratingGlobalRead = useCanvasStore((state) => state.isGenerating);
+    const isMounted = React.useRef(true);
+
+    React.useEffect(() => {
+        return () => {
+            isMounted.current = false;
+        };
+    }, []);
 
     const handleCreateAction = async () => {
         setIsGenerating(true);
@@ -69,7 +76,9 @@ export function AgentNode({ id, data, positionAbsoluteX, positionAbsoluteY }: an
             posthog.capture('agent_expansion_failed', { pillar_name: data.label, reason: 'api_error' });
             toast.error(e instanceof Error ? e.message : "Agent overloaded. Recalibrating strategy...");
         } finally {
-            setIsGenerating(false);
+            if (isMounted.current) {
+                setIsGenerating(false);
+            }
             setIsGeneratingGlobal(false);
         }
     };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { useCanvasStore } from '@/store/useCanvasStore';
@@ -12,6 +12,13 @@ export function TriggerNode({ id, data }: { id: string, data: any }) {
     const setIsGeneratingGlobal = useCanvasStore((state) => state.setIsGenerating);
     const isGeneratingGlobalRead = useCanvasStore((state) => state.isGenerating);
     const [isGenerating, setIsGenerating] = useState(false);
+    const isMounted = React.useRef(true);
+
+    React.useEffect(() => {
+        return () => {
+            isMounted.current = false;
+        };
+    }, []);
 
     const handleGenerate = async () => {
         if (!data.input) return;
@@ -56,7 +63,9 @@ export function TriggerNode({ id, data }: { id: string, data: any }) {
             posthog.capture('strategy_generation_failed', { reason: 'api_error', input_length: data.input.length });
             toast.error(e instanceof Error ? e.message : "Agent overloaded. Recalibrating strategy...");
         } finally {
-            setIsGenerating(false);
+            if (isMounted.current) {
+                setIsGenerating(false);
+            }
             setIsGeneratingGlobal(false);
         }
     };
