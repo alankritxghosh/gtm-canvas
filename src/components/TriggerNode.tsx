@@ -43,12 +43,15 @@ export function TriggerNode({ id, data }: { id: string, data: any }) {
                 }));
 
                 addGeneratedNodes(newNodes, newEdges);
-                posthog.capture('strategy_generated', { input_length: data.input.length });
+                posthog.capture('strategy_generated', { input_length: data.input.length, pillar_count: result.nodes.length });
             } else {
+                posthog.capture('strategy_generation_failed', { reason: 'empty_response', input_length: data.input.length });
                 toast.error("Agent overloaded. Recalibrating strategy...");
             }
         } catch (e) {
             console.error(e);
+            posthog.captureException(e);
+            posthog.capture('strategy_generation_failed', { reason: 'api_error', input_length: data.input.length });
             toast.error("Agent overloaded. Recalibrating strategy...");
         } finally {
             setIsGenerating(false);
@@ -82,7 +85,10 @@ export function TriggerNode({ id, data }: { id: string, data: any }) {
 
             {!data.input && (
                 <button
-                    onClick={() => updateNodeData(id, { input: "A B2B SaaS platform for AI-driven customer support automation, featuring semantic search, real-time agent handoff, and CRM integration." })}
+                    onClick={() => {
+                        updateNodeData(id, { input: "A B2B SaaS platform for AI-driven customer support automation, featuring semantic search, real-time agent handoff, and CRM integration." });
+                        posthog.capture('example_input_used');
+                    }}
                     className="mb-4 w-full flex items-center justify-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-xs font-medium text-indigo-300 shadow-[0_0_15px_rgba(99,102,241,0.2)] transition-all hover:bg-indigo-500/20 hover:shadow-[0_0_20px_rgba(99,102,241,0.4)]"
                 >
                     <Sparkles className="h-3 w-3" />

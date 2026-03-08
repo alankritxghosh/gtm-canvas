@@ -2,6 +2,17 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+async function capturePostHogEvent(event: string, properties: Record<string, unknown>) {
+  const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  const host = process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com';
+  if (!key) return;
+  await fetch(`${host}/capture/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ api_key: key, event, distinct_id: 'server', properties }),
+  }).catch(() => {});
+}
+
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
@@ -86,6 +97,11 @@ export async function POST(req: Request) {
     }).strict();
 
     const parsed = ReactFlowSchema.parse(JSON.parse(responseText));
+
+    await capturePostHogEvent('strategy_generated_server', {
+      input_length: sanitizedInput.length,
+      pillar_count: parsed.nodes.length,
+    });
 
     return NextResponse.json(parsed);
 

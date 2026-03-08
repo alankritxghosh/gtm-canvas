@@ -4,6 +4,7 @@ import { Plus, BrainCircuit, Loader2 } from 'lucide-react';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import posthog from 'posthog-js';
 
 export function AgentNode({ id, data, positionAbsoluteX, positionAbsoluteY }: any) {
     const [isGenerating, setIsGenerating] = useState(false);
@@ -20,6 +21,8 @@ export function AgentNode({ id, data, positionAbsoluteX, positionAbsoluteY }: an
         // Find the original Trigger Node input to use directly as Product Context
         const triggerNode = useCanvasStore.getState().nodes.find(n => n.type === 'trigger');
         const productContext = triggerNode?.data?.input || "SaaS Product";
+
+        posthog.capture('agent_deep_dive_started', { pillar_name: data.label });
 
         try {
             const res = await fetch('/api/expand', {
@@ -53,11 +56,15 @@ export function AgentNode({ id, data, positionAbsoluteX, positionAbsoluteY }: an
                 }));
 
                 addGeneratedNodes(newNodes, newEdges);
+                posthog.capture('agent_expanded', { pillar_name: data.label, action_count: result.nodes.length });
             } else {
+                posthog.capture('agent_expansion_failed', { pillar_name: data.label, reason: 'empty_response' });
                 toast.error("Agent overloaded. Recalibrating strategy...");
             }
         } catch (e) {
             console.error(e);
+            posthog.captureException(e);
+            posthog.capture('agent_expansion_failed', { pillar_name: data.label, reason: 'api_error' });
             toast.error("Agent overloaded. Recalibrating strategy...");
         } finally {
             setIsGenerating(false);

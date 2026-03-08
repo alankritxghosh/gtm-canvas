@@ -2,9 +2,15 @@ import { Handle, Position } from '@xyflow/react';
 import { FileText, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCanvasStore } from '@/store/useCanvasStore';
+import posthog from 'posthog-js';
 
 export function ActionNode({ id, data }: { id: string; data: any }) {
     const setSelectedNode = useCanvasStore((state) => state.setSelectedNode);
+
+    const handleClick = () => {
+        setSelectedNode({ id, data });
+        posthog.capture('artifact_viewed', { title: data.label });
+    };
 
     return (
         <motion.div
@@ -13,7 +19,7 @@ export function ActionNode({ id, data }: { id: string; data: any }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            onClick={() => setSelectedNode({ id, data })}
+            onClick={handleClick}
             className="w-[260px] cursor-pointer rounded-xl border border-emerald-500/40 bg-zinc-950/80 backdrop-blur-md p-4 shadow-xl shadow-emerald-900/20 hover:border-emerald-400 group transition-colors"
         >
             <div className="flex items-center justify-between">

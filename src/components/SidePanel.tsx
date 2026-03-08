@@ -19,6 +19,7 @@ export function SidePanel() {
     const handleCopy = () => {
         navigator.clipboard.writeText(data.content || '');
         setCopied(true);
+        posthog.capture('artifact_copied', { title: data.label });
         setTimeout(() => setCopied(false), 2000);
     };
 
