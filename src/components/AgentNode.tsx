@@ -36,7 +36,10 @@ export function AgentNode({ id, data, positionAbsoluteX, positionAbsoluteY }: an
                     startY: positionAbsoluteY || 0
                 }),
             });
-            if (!res.ok) throw new Error("API Error");
+            if (!res.ok) {
+                const errResult = await res.json().catch(() => null);
+                throw new Error(errResult?.error || "API Error: Failed to expand node");
+            }
             const result = await res.json();
 
             if (result.nodes && result.edges) {
@@ -65,7 +68,7 @@ export function AgentNode({ id, data, positionAbsoluteX, positionAbsoluteY }: an
             console.error(e);
             posthog.captureException(e);
             posthog.capture('agent_expansion_failed', { pillar_name: data.label, reason: 'api_error' });
-            toast.error("Agent overloaded. Recalibrating strategy...");
+            toast.error(e instanceof Error ? e.message : "Agent overloaded. Recalibrating strategy...");
         } finally {
             setIsGenerating(false);
             setIsGeneratingGlobal(false);

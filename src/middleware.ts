@@ -3,42 +3,55 @@ import type { NextRequest } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 
-// Initialize Redis 
-// Make sure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are in your .env
-const redis = Redis.fromEnv();
-
-const ratelimit = new Ratelimit({
-    redis: redis,
-    // 10 requests per 1 hour
-    limiter: Ratelimit.slidingWindow(10, '1 h'),
-});
+let ratelimit: Ratelimit | null = null;
+try {
+    const redis = Redis.fromEnv();
+    ratelimit = new Ratelimit({
+        redis: redis,
+        limiter: Ratelimit.slidingWindow(10, '1 h'),
+    });
+} catch (error) {
+    console.error("Failed to initialize Upstash Redis:", error);
+}
 
 export async function middleware(request: NextRequest) {
     // True client IP on Vercel Edge + Fallbacks without easily spoofable headers
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
 
-    // CORS & Origin verification
+    // CORS & Origin verification 
     const origin = request.headers.get('origin') || request.headers.get('referer');
-    if (origin && !origin.includes('localhost') && !origin.includes('agentic-gtm-canvas.vercel.app')) {
-        return NextResponse.json({ error: 'Unauthorized Origin' }, { status: 403 });
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || '';
+
+    // Loosened Origin check to allow any Vercel domain during preview/launch, and the explicit NEXT_PUBLIC_SITE_URL
+    if (origin && !origin.includes('localhost') && !origin.includes('vercel.app') && (!siteUrl || !origin.includes(siteUrl))) {
+        return NextResponse.json({ error: 'Unauthorized Origin. Please update NEXT_PUBLIC_SITE_URL.' }, { status: 403 });
     }
 
-    const { success, limit, reset, remaining } = await ratelimit.limit(
-        `ratelimit_gtm_canvas_${ip}`
-    );
+    if (!ratelimit) {
+        return NextResponse.json({ error: 'Internal Security Error: Upstash Redis not configured. Check Environment Variables.' }, { status: 500 });
+    }
 
-    if (!success) {
-        return NextResponse.json(
-            { error: 'Too Many Requests' },
-            {
-                status: 429,
-                headers: {
-                    'X-RateLimit-Limit': limit.toString(),
-                    'X-RateLimit-Remaining': remaining.toString(),
-                    'X-RateLimit-Reset': reset.toString(),
-                },
-            }
+    try {
+        const { success, limit, reset, remaining } = await ratelimit.limit(
+            `ratelimit_gtm_canvas_${ip}`
         );
+
+        if (!success) {
+            return NextResponse.json(
+                { error: 'Rate limit exceeded. Too many requests.' },
+                {
+                    status: 429,
+                    headers: {
+                        'X-RateLimit-Limit': limit.toString(),
+                        'X-RateLimit-Remaining': remaining.toString(),
+                        'X-RateLimit-Reset': reset.toString(),
+                    },
+                }
+            );
+        }
+    } catch (e) {
+        console.error("Rate limit check failed:", e);
+        return NextResponse.json({ error: 'Rate limit engine failed to respond. Check Upstash configuration.' }, { status: 500 });
     }
 
     return NextResponse.next();

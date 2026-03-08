@@ -22,7 +22,10 @@ export function TriggerNode({ id, data }: { id: string, data: any }) {
                 method: 'POST',
                 body: JSON.stringify({ input: data.input }),
             });
-            if (!res.ok) throw new Error("API Error");
+            if (!res.ok) {
+                const errResult = await res.json().catch(() => null);
+                throw new Error(errResult?.error || "API Error: Failed to generate strategy");
+            }
             const result = await res.json();
 
             if (result.nodes && result.edges) {
@@ -52,7 +55,7 @@ export function TriggerNode({ id, data }: { id: string, data: any }) {
             console.error(e);
             posthog.captureException(e);
             posthog.capture('strategy_generation_failed', { reason: 'api_error', input_length: data.input.length });
-            toast.error("Agent overloaded. Recalibrating strategy...");
+            toast.error(e instanceof Error ? e.message : "Agent overloaded. Recalibrating strategy...");
         } finally {
             setIsGenerating(false);
             setIsGeneratingGlobal(false);
