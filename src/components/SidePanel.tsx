@@ -11,12 +11,19 @@ export function SidePanel() {
     const selectedNode = useCanvasStore((state) => state.selectedNode);
     const setSelectedNode = useCanvasStore((state) => state.setSelectedNode);
     const [copied, setCopied] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+    const [isExporting, setIsExporting] = useState(false);
+
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        };
+    }, []);
 
     if (!selectedNode) return null;
 
     const data = selectedNode.data;
-
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const handleCopy = () => {
         navigator.clipboard.writeText(data.content || '');
@@ -25,15 +32,6 @@ export function SidePanel() {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => setCopied(false), 2000);
     };
-
-    useEffect(() => {
-        return () => {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        };
-    }, []);
-
-    const contentRef = useRef<HTMLDivElement>(null);
-    const [isExporting, setIsExporting] = useState(false);
 
     const handleExportPDF = async () => {
         if (!contentRef.current) return;
