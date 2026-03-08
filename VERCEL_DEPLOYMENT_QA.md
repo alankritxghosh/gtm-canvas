@@ -7,8 +7,8 @@ When importing the GitHub repository into Vercel, copy and paste the following v
 **🔴 SERVER-ONLY SECRETS (Do NOT prefix with NEXT_PUBLIC)**
 These are safely isolated on the Edge runtime.
 - \`GEMINI_API_KEY\` = `[Your Gemini 3.1 Pro / Flash Key]`
-- \`KV_REST_API_URL\` = `[Your Upstash / Vercel KV REST URL]`
-- \`KV_REST_API_TOKEN\` = `[Your Upstash / Vercel KV REST Token]`
+- \`UPSTASH_REDIS_REST_URL\` = `[Your Upstash Redis REST URL]`
+- \`UPSTASH_REDIS_REST_TOKEN\` = `[Your Upstash Redis REST Token]`
 
 **🟢 PUBLIC CLIENT VARIABLES**
 These are injected into the frontend.

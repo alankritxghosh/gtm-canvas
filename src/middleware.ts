@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
+
+// Initialize Redis 
+// Make sure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are in your .env
+const redis = Redis.fromEnv();
 
 const ratelimit = new Ratelimit({
-    redis: kv,
+    redis: redis,
     // 10 requests per 1 hour
     limiter: Ratelimit.slidingWindow(10, '1 h'),
 });
